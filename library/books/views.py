@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 from django.views import View
 from .models import Book, Category
+from accounts.models import BorrowedBook
 from django.contrib import messages
 from django.utils import timezone
 
@@ -24,7 +25,21 @@ class BookDetailView(DetailView):
     template_name = 'books/book_details.html'
     context_object_name = 'book'
 
-    
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        book = self.get_object()
+        
+        if not self.request.user.is_superuser:
+            student = self.request.user
+            has_borrowed = BorrowedBook.objects.filter(book=book, student=student, return_date__isnull=True).exists()
+            context['has_borrowed'] = has_borrowed
+            context['is_student'] = True
+        else:
+            context['is_admin'] = self.request.user.is_superuser
+            context['is_student'] = False
+
+        return context
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_superuser, login_url=reverse_lazy('home')), name='dispatch')
@@ -55,6 +70,36 @@ class UpdateBook(UpdateView):
     form_class = BookForm
     template_name = 'books/edit_book.html'
     success_url = reverse_lazy('home')
+    
+@method_decorator(login_required, name='dispatch')
+class BorrowBookView(View):
+    def post(self, request, book_id):
+        book = get_object_or_404(Book, id=book_id)
+        student = request.user
+
+        if BorrowedBook.objects.filter(book=book, student=student, return_date__isnull=True).exists():
+            messages.error(request, "You have already borrowed this book.")
+        else:
+            BorrowedBook.objects.create(book=book, student=student)
+            messages.success(request, "Book borrowed successfully!")
+
+        return redirect('book.details', pk=book_id)
+
+@method_decorator(login_required, name='dispatch')
+class ReturnBookView(View):
+    def post(self, request, book_id):
+        book = get_object_or_404(Book, id=book_id)
+        student = request.user
+
+        borrowed_book = BorrowedBook.objects.filter(book=book, student=student, return_date__isnull=True).first()
+        if borrowed_book:
+            borrowed_book.return_date = timezone.now()  # Mark as returned
+            borrowed_book.save()  # This will trigger the logic in the model to increase `copies_left`
+            messages.success(request, "Book returned successfully!")
+        else:
+            messages.error(request, "You haven't borrowed this book.")
+
+        return redirect('book.details', pk=book_id)
     
 
 class CategoryCreateView(CreateView):
