@@ -3,21 +3,25 @@ from django.db import models
 from books.models import Book
 from django.utils import timezone
 
+
 class Student(AbstractUser):
-    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+    profile_image = models.ImageField(
+        upload_to='profile_images/', blank=True, null=True)
     borrowed_books = models.ManyToManyField(Book, through='BorrowedBook')
 
     def __str__(self):
-        return self.username  
+        return self.username
+
     @property
     def image_url(self):
         return f'/media/{self.profile_image}'
-    
 
 
 class BorrowedBook(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='borrowed_books_set')
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='borrowers')
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name='borrowed_books_set')
+    book = models.ForeignKey(
+        Book, on_delete=models.CASCADE, related_name='borrowers')
     date_borrowed = models.DateTimeField(default=timezone.now)
     return_date = models.DateTimeField(null=True, blank=True)
 

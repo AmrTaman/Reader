@@ -16,8 +16,10 @@ def home(request):
     books = Book.objects.all().order_by('id')
     return render(request, 'books/index.html', {"books": books})
 
+
 def is_superuser(user):
     return user.is_superuser
+
 
 @method_decorator(login_required, name='dispatch')
 class BookDetailView(DetailView):
@@ -26,13 +28,14 @@ class BookDetailView(DetailView):
     context_object_name = 'book'
 
     def get_context_data(self, **kwargs):
-        
+
         context = super().get_context_data(**kwargs)
         book = self.get_object()
-        
+
         if not self.request.user.is_superuser:
             student = self.request.user
-            has_borrowed = BorrowedBook.objects.filter(book=book, student=student, return_date__isnull=True).exists()
+            has_borrowed = BorrowedBook.objects.filter(
+                book=book, student=student, return_date__isnull=True).exists()
             context['has_borrowed'] = has_borrowed
             context['is_student'] = True
         else:
@@ -41,12 +44,13 @@ class BookDetailView(DetailView):
 
         return context
 
+
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_superuser, login_url=reverse_lazy('home')), name='dispatch')
 class BookDeleteView(DeleteView):
     model = Book
     template_name = 'books/book_confirm_delete.html'
-    success_url = reverse_lazy('home') 
+    success_url = reverse_lazy('home')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -59,10 +63,11 @@ class CreateBook(CreateView):
     def form_valid(self, form):
         if form.is_valid():
             book = form.save(commit=False)
-            book.user = self.request.user 
+            book.user = self.request.user
             book.save()
             return redirect('home')
-        
+
+
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_superuser, login_url=reverse_lazy('home')), name='dispatch')
 class UpdateBook(UpdateView):
@@ -70,7 +75,8 @@ class UpdateBook(UpdateView):
     form_class = BookForm
     template_name = 'books/edit_book.html'
     success_url = reverse_lazy('home')
-    
+
+
 @method_decorator(login_required, name='dispatch')
 class BorrowBookView(View):
     def post(self, request, book_id):
@@ -85,13 +91,15 @@ class BorrowBookView(View):
 
         return redirect('book.details', pk=book_id)
 
+
 @method_decorator(login_required, name='dispatch')
 class ReturnBookView(View):
     def post(self, request, book_id):
         book = get_object_or_404(Book, id=book_id)
         student = request.user
 
-        borrowed_book = BorrowedBook.objects.filter(book=book, student=student, return_date__isnull=True).first()
+        borrowed_book = BorrowedBook.objects.filter(
+            book=book, student=student, return_date__isnull=True).first()
         if borrowed_book:
             borrowed_book.return_date = timezone.now()  # Mark as returned
             borrowed_book.save()  # This will trigger the logic in the model to increase `copies_left`
@@ -100,7 +108,7 @@ class ReturnBookView(View):
             messages.error(request, "You haven't borrowed this book.")
 
         return redirect('book.details', pk=book_id)
-    
+
 
 class CategoryCreateView(CreateView):
     model = Category
@@ -108,10 +116,12 @@ class CategoryCreateView(CreateView):
     template_name = 'categories/category_form.html'
     success_url = reverse_lazy('category_list')
 
+
 class CategoryListView(ListView):
     model = Category
     template_name = 'categories/category_list.html'
     context_object_name = 'categories'
+
 
 @method_decorator(login_required, name='dispatch')
 class CategoryDetailView(DetailView):
@@ -125,6 +135,7 @@ class CategoryDetailView(DetailView):
 
         return context
 
+
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_superuser, login_url=reverse_lazy('home')), name='dispatch')
 class UpdateCategory(UpdateView):
@@ -132,4 +143,3 @@ class UpdateCategory(UpdateView):
     form_class = CategoryForm
     template_name = 'categories/edit_category.html'
     success_url = reverse_lazy('category_list')
-

@@ -1,6 +1,6 @@
 from django.urls import path, reverse_lazy
-from accounts.views import (AccountCreateView, AccountsDetailView, profile, 
-                            ProfileUpdateView, StudentBorrowedBooksListView, 
+from accounts.views import (AccountCreateView, AccountsDetailView, profile,
+                            ProfileUpdateView, StudentBorrowedBooksListView,
                             CustomLogoutView)
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('profile/', login_required(profile), name='profile'),
-    path('profile/<int:pk>/', login_required(AccountsDetailView.as_view()), name='accounts.profile'),
+    path('profile/<int:pk>/', login_required(AccountsDetailView.as_view()),
+         name='accounts.profile'),
     path('register/', AccountCreateView.as_view(), name='register'),
     path('logout/', CustomLogoutView.as_view(template_name='registration/logout.html'), name='logout'),
 
@@ -18,9 +19,10 @@ urlpatterns = [
     ), name='password_change'),
 
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(
-        template_name='registration/password_change_done.html' 
+        template_name='registration/password_change_done.html'
     ), name='password_change_done'),
 
     path('profile/edit/', ProfileUpdateView.as_view(), name='profile_edit'),
-    path('admin_dashboard/', StudentBorrowedBooksListView.as_view(), name='students.data'),
+    path('admin_dashboard/', StudentBorrowedBooksListView.as_view(),
+         name='students.data'),
 ]

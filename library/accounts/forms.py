@@ -2,13 +2,15 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Student, Book
 
+
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     profile_image = forms.ImageField(required=False)
 
     class Meta:
         model = Student
-        fields = ['username', 'email', 'profile_image', 'password1', 'password2']
+        fields = ['username', 'email',
+                  'profile_image', 'password1', 'password2']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -19,14 +21,17 @@ class RegistrationForm(UserCreationForm):
             if field_name in ['username', 'password1', 'password2']:
                 field.label = field.label.capitalize()  # Capitalize labels if needed
 
+
 class BorrowBookForm(forms.Form):
-    book = forms.ModelChoiceField(queryset=Book.objects.all(), label="Select a book to borrow")
+    book = forms.ModelChoiceField(
+        queryset=Book.objects.all(), label="Select a book to borrow")
 
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Student
-        fields = ['username', 'email', 'profile_image']  # Adjust fields as needed
+        # Adjust fields as needed
+        fields = ['username', 'email', 'profile_image']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Category',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100)),
                 ('description', models.TextField(blank=True)),
             ],
@@ -23,12 +24,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Book',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
                 ('description', models.TextField(blank=True)),
-                ('image', models.ImageField(blank=True, null=True, upload_to='books/images/')),
+                ('image', models.ImageField(blank=True,
+                 null=True, upload_to='books/images/')),
                 ('copies_left', models.PositiveIntegerField(default=0)),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='books', to='books.category')),
+                ('category', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, related_name='books', to='books.category')),
             ],
         ),
     ]

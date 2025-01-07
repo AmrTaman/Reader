@@ -7,6 +7,7 @@ class CategoryForm(forms.ModelForm):
         model = Category
         fields = ['name', 'description']
 
+
 class BookForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,4 +25,3 @@ class BookForm(forms.ModelForm):
         if len(name) < 3:
             raise forms.ValidationError("Name must be at least 3 characters")
         return name
-

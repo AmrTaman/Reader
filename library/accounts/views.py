@@ -5,19 +5,22 @@ from django.views.generic import CreateView, DetailView, UpdateView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.forms import RegistrationForm, ProfileUpdateForm
-from .models import Student 
+from .models import Student
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from datetime import timedelta
 from django.contrib.auth.views import LogoutView, PasswordChangeDoneView
 
+
 def is_superuser(user):
     return user.is_superuser
+
 
 @login_required
 def profile(request):
     url = reverse('home')
     return redirect(url)
+
 
 class AccountsDetailView(LoginRequiredMixin, DetailView):
     model = Student
@@ -32,7 +35,7 @@ class AccountsDetailView(LoginRequiredMixin, DetailView):
             student = self.get_object()
         except Http404:
             return redirect('students.data')
-        
+
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -44,6 +47,8 @@ class AccountsDetailView(LoginRequiredMixin, DetailView):
             return redirect('accounts.profile', pk=student.pk)
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
 class AccountCreateView(CreateView):
     model = Student
     template_name = 'accounts/create.html'
@@ -55,7 +60,6 @@ class AccountCreateView(CreateView):
         user = form.save()
         login(self.request, user)
         return response
-    
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -64,12 +68,13 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'accounts/edit_profile.html'
 
     def get_object(self):
-        return self.request.user 
+        return self.request.user
 
     def get_success_url(self):
         return reverse_lazy('accounts.profile', kwargs={'pk': self.request.user.pk})
-    
-@method_decorator(login_required, name='dispatch')    
+
+
+@method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_superuser, login_url=reverse_lazy('home')), name='dispatch')
 class StudentBorrowedBooksListView(ListView):
     model = Student
@@ -78,7 +83,7 @@ class StudentBorrowedBooksListView(ListView):
 
     def get_queryset(self):
         return Student.objects.prefetch_related('borrowed_books_set__book').order_by("id")
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         students = context['students']
@@ -89,11 +94,13 @@ class StudentBorrowedBooksListView(ListView):
                 if borrowed_book.return_date:
                     borrowed_book.return_date += timedelta(hours=3)
         return context
+
+
 class CustomLogoutView(LogoutView):
     def get_next_page(self):
-        return reverse_lazy('home') 
+        return reverse_lazy('home')
+
 
 class CustomPasswordChangeView(PasswordChangeDoneView):
     def get_next_page(self):
-        return reverse_lazy('home')  
-
+        return reverse_lazy('home')
