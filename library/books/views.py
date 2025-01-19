@@ -143,3 +143,9 @@ class UpdateCategory(UpdateView):
     form_class = CategoryForm
     template_name = 'categories/edit_category.html'
     success_url = reverse_lazy('category_list')
+
+
+class DeleteCategoryView(DeleteView):
+    model = Category
+    template_name = 'categories/category_confirm_delete.html'
+    success_url = reverse_lazy('category_list')
